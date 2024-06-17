@@ -1,26 +1,33 @@
 using System;
 using System.IO; 
+using System.Text.RegularExpressions; 
 
 public class CPHInline
 {
 	
 	public string backgroundFilePath; 
-	public string variableName; 
+	public string variableName; //the name of the variable in the CSS we want to change. In this case, the color of the background. 
 	public string newColor; 
 	
 	public bool Execute()
 	{
-		backgroundFilePath = @"C:\Users\joshu\Desktop\Scrolling Backgrounds\heartscroller.html"; 
+		backgroundFilePath = @"C:\Users\joshu\Desktop\Scrolling Backgrounds\heartscroller.html"; //maybe this should look different :) 
 		variableName = "--main-bg-color"; 
-		newColor = args["rawInput"].ToString(); 
+		newColor = args["rawInput"].ToString(); //what the user inputs from twitch
 		
-		if(!checkIfValidColor(newColor))
+		if(!checkIfValidColor(newColor) && !checkIfHex(newColor))
 		{
 			newColor = "red"; 
 			CPH.SendMessage("That was not a valid color! Defaulting to red", true); 
 		}
 		
+		if(checkIfHex(newColor))
+		{
+			CPH.SendMessage("You entered a hex code? How complicated...", true); 
+		}
 		
+		
+		//search through the file, find the variable, and replace it with the input. 
 		string[] fileLines = File.ReadAllLines(backgroundFilePath);
 		for(int i = 0; i < fileLines.Length; i++)
 		{
@@ -38,11 +45,17 @@ public class CPHInline
 		
 		File.WriteAllLines(backgroundFilePath, fileLines); 
 		
-		CPH.ObsSendRaw("PressInputPropertiesButton", "{'inputName': 'Heart Scrolling Background', 'propertyName': 'refreshnocache'}", 0);
+		CPH.ObsSendRaw("PressInputPropertiesButton", "{'inputName': 'Pixel Scrolling Background', 'propertyName': 'refreshnocache'}", 0);
 
 		
 		
 		return true;
+	}
+	
+	public bool checkIfHex(string possibleColor)
+	{
+		Regex hexColorRegex = new Regex(@"^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$");
+		return hexColorRegex.IsMatch(possibleColor); 
 	}
 	
 	
