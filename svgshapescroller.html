@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scrolling Star Pattern with Streamer.bot Client</title>
+  <style>
+    :root {
+      background-color: var(--bg-color);
+      --star-color: gold; 
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #30daf8;
+      transition: background-color 1s ease-in-out; 
+    }
+
+    #scroller {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3840px; 
+      height: 1080px;
+      display: flex;
+      animation: scroll 30s linear infinite;
+    }
+
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-1920px); }
+    }
+
+    svg {
+      width: 3840px;
+      height: 1080px; 
+      flex-shrink: 0;
+      --star-color:gold;
+    }
+
+    .star{
+      fill: gold; 
+      transition: fill 1s ease-in-out; 
+      transform-origin: center; 
+    }
+
+  </style>
+  <script type="text/javascript" src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
+</head>
+
+<body style="background-color: #30daf8;">
+  <div id="scroller">
+    <svg viewBox="0 0 3840 1080" preserveAspectRatio="none">
+      <defs>
+        <pattern id="spinPattern" width="120" height="120" patternUnits="userSpaceOnUse" overflow = "visible">
+    <g id="starGroup" style="transform-box: fill-box; transform-origin: center; overflow: visible;" >
+      <path id="starPath" 
+            d="M30,5 L36,22 L55,22 L39,35 L45,52 L30,42 L15,52 L21,35 L5,22 L24,22 Z"
+            fill="gold"
+            stroke="black"
+            transform="scale(2) "
+            stroke-width="4"
+            stroke-linejoin="round"
+            style="transition: fill 1s ease-in-out;" />
+      <animateTransform id="starAnim"
+                        attributeName="transform"
+                        attributeType="XML"
+                        type="rotate"
+                        from="0 0 0"
+                        to="360 0 0"
+                        dur="1s"
+                        repeatCount="1"
+                        begin="indefinite" />
+    </g>
+  </pattern>
+      </defs>
+      <rect width="3840" height="1080" fill="url(#spinPattern)" />
+    </svg>
+  
+    <svg viewBox="0 0 3840 1080" preserveAspectRatio="none">
+      <rect width="3840" height="1080" fill="url(#spinPattern)" />
+    </svg>
+  </div>
+
+  <script>
+
+    const client = new StreamerbotClient({
+      host: '127.0.0.1',
+      port: 8080,
+      onConnect: (info) => {
+        console.log("Connected to Streamer.bot", info);
+      },
+      onError: (err) => {
+        console.error("Error connecting to Streamer.bot", err);
+      },
+      onDisconnect: () => {
+        console.warn(" Disconnected from Streamer.bot");
+      }
+    });
+
+    client.on('General.Custom', (event) => {
+      const data = event?.data;
+
+      if (data?.bgColor) {
+        document.body.style.backgroundColor = data.bgColor;
+        console.log("Background color set to:", data.bgColor);
+      }
+
+      if (data?.starColor) {
+        const path = document.getElementById('starPath');
+        const anim = document.getElementById('starAnim');
+        if (path && anim) {
+          path.setAttribute('fill', data.starColor);
+          anim.beginElement();
+        }
+    }
+    });
+  </script>
+</body>
+</html>
